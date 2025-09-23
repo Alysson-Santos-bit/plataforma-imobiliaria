@@ -1,10 +1,10 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Home, BarChart2, Users, Settings, Building, ChevronLeft, PlusCircle, ArrowLeft, Pencil } from 'lucide-react';
-import { api } from '../../../services/api';
+import { Home, BarChart2, Users, Settings, Building, ChevronLeft, PlusCircle, ArrowLeft, Pencil, Trash2 } from 'lucide-react';
+import { api } from '@/services/api';
 
-// --- Tipos (Agora corresponde 100% ao DTO do Back-end) ---
+// --- Tipos ---
 type Imovel = {
   id: string; 
   title: string;
@@ -18,7 +18,7 @@ type Imovel = {
   bedrooms: number;
   bathrooms: number;
   type: 'APARTMENT' | 'HOUSE' | 'LAND' | 'COMMERCIAL';
-  imageUrls: string[]; // CORREÇÃO: O nome do campo é 'imageUrls'
+  imageUrls: string[];
 };
 
 type PaginaId = 'painel' | 'analises' | 'imoveis' | 'usuarios' | 'configuracoes';
@@ -142,11 +142,17 @@ const ListaImoveis = ({ imoveis, onVerDetalhes, onAdicionarClick }: { imoveis: I
   </div>
 );
 
-const DetalhesImovel = ({ imovel, onVoltar, onEditar }: { imovel: Imovel, onVoltar: () => void, onEditar: (imovel: Imovel) => void }) => {
+const DetalhesImovel = ({ imovel, onVoltar, onEditar, onDeletar }: { imovel: Imovel, onVoltar: () => void, onEditar: (imovel: Imovel) => void, onDeletar: (id: string) => void }) => {
     const fotoPrincipal = imovel.imageUrls && imovel.imageUrls.length > 0
       ? imovel.imageUrls[0]
       : `https://placehold.co/600x400/e2e8f0/64748b?text=Sem+Foto`;
     const fotosSecundarias = imovel.imageUrls?.slice(1) || [];
+
+    const handleDeletarClick = () => {
+        if (window.confirm("Tem a certeza que deseja apagar este imóvel? Esta ação é irreversível.")) {
+            onDeletar(imovel.id);
+        }
+    }
 
     return (
       <div className="p-8">
@@ -155,13 +161,22 @@ const DetalhesImovel = ({ imovel, onVoltar, onEditar }: { imovel: Imovel, onVolt
                 <ArrowLeft size={20} className="mr-2" />
                 Voltar para a lista
             </button>
-            <button
-                onClick={() => onEditar(imovel)}
-                className="flex items-center bg-blue-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-600 transition-colors"
-            >
-                <Pencil size={20} className="mr-2" />
-                Editar
-            </button>
+            <div className="flex space-x-2">
+                <button
+                    onClick={() => onEditar(imovel)}
+                    className="flex items-center bg-blue-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-600 transition-colors"
+                >
+                    <Pencil size={20} className="mr-2" />
+                    Editar
+                </button>
+                <button
+                    onClick={handleDeletarClick}
+                    className="flex items-center bg-red-600 text-white px-4 py-2 rounded-lg shadow-md hover:bg-red-700 transition-colors"
+                >
+                    <Trash2 size={20} className="mr-2" />
+                    Deletar
+                </button>
+            </div>
         </div>
         <div className="bg-white p-8 rounded-xl shadow-md">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -430,6 +445,19 @@ export default function DashboardPage() {
       }
     }
   };
+
+  const handleDeletarImovel = async (id: string) => {
+    try {
+        setError(null);
+        await api.delete(`/properties/${id}`);
+        await fetchImoveis();
+        setModoImoveis('lista');
+        setImovelSelecionado(null);
+    } catch (err: any) {
+        const apiError = err.response?.data;
+        setError(apiError?.message || 'Não foi possível apagar o imóvel');
+    }
+  };
   
   const renderizarConteudoImoveis = () => {
     if (loading) return <div className="p-8 text-center">A carregar imóveis...</div>;
@@ -439,7 +467,7 @@ export default function DashboardPage() {
         case 'lista':
           return <ListaImoveis imoveis={imoveis} onVerDetalhes={handleVerDetalhes} onAdicionarClick={handleAdicionarClick} />;
         case 'detalhes':
-          return imovelSelecionado ? <DetalhesImovel imovel={imovelSelecionado} onVoltar={handleVoltarParaLista} onEditar={handleEditarClick}/> : null;
+          return imovelSelecionado ? <DetalhesImovel imovel={imovelSelecionado} onVoltar={handleVoltarParaLista} onEditar={handleEditarClick} onDeletar={handleDeletarImovel} /> : null;
         case 'adicionar':
           return <FormularioImovel onSalvar={(data) => handleSalvarImovel(data)} onCancelar={handleVoltarParaLista} tituloForm="Adicionar Novo Imóvel"/>;
         case 'editar':

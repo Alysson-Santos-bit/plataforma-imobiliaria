@@ -9,7 +9,7 @@ import { ReferralsModule } from './referrals/referrals.module';
 import { User } from './users/entities/user.entity';
 import { Property } from './properties/entities/property.entity';
 import { Referral } from './referrals/referrals.entity';
-import { Document } from './documents/document.entity'; // 1. Importa a nova entidade
+import { Document } from './documents/document.entity';
 
 @Module({
   imports: [
@@ -18,15 +18,17 @@ import { Document } from './documents/document.entity'; // 1. Importa a nova ent
     }),
     TypeOrmModule.forRoot({
       type: 'postgres',
-      host: process.env.DATABASE_HOST,
-      port: parseInt(process.env.DATABASE_PORT, 10) || 5432,
-      username: process.env.DATABASE_USER,
-      password: process.env.DATABASE_PASSWORD,
-      database: process.env.DATABASE_NAME,
-      // 2. Adiciona a nova entidade à lista de construção
+      // --- CORRIGIDO ---
+      // Agora, estamos a usar os nomes corretos das variáveis do ficheiro .env
+      host: process.env.DB_HOST,
+      port: parseInt(process.env.DB_PORT, 10) || 5432,
+      username: process.env.DB_USERNAME,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_DATABASE,
+      // --- FIM DA CORREÇÃO ---
       entities: [User, Property, Referral, Document],
-      synchronize: true,
-      logging: false, // Desligando o modo detetive por enquanto
+      synchronize: true, // `synchronize: true` é ótimo para desenvolvimento, mas deve ser desativado em produção.
+      logging: false,
     }),
     AuthModule,
     UsersModule,
@@ -38,4 +40,3 @@ import { Document } from './documents/document.entity'; // 1. Importa a nova ent
   providers: [],
 })
 export class AppModule {}
-

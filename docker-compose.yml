@@ -1,0 +1,30 @@
+# Define a versão do Docker Compose que estamos usando
+version: '3.8'
+
+# Define os serviços (contêineres) que nossa aplicação precisa
+services:
+  # O serviço do nosso banco de dados PostgreSQL
+  postgres_db:
+    # Usa a imagem oficial do PostgreSQL, versão 13 (leve e estável)
+    image: postgres:13-alpine
+    # Dá um nome fácil de identificar para o nosso contêiner
+    container_name: imobilis-db
+    # Garante que o banco de dados sempre reinicie se parar por algum motivo
+    restart: always
+    # Define as variáveis de ambiente para configurar o banco de dados
+    environment:
+      POSTGRES_USER: user_imobilis
+      POSTGRES_PASSWORD: password_imobilis
+      POSTGRES_DB: db_imobilis
+    # Mapeia a porta 5432 do contêiner para a porta 5432 da nossa máquina no Codespaces
+    # Isso permite que o back-end se conecte ao banco de dados
+    ports:
+      - "5432:5432"
+    # Cria um "volume" para persistir os dados. Isso garante que, mesmo que
+    # o contêiner seja recriado, os dados (imóveis, usuários) não sejam perdidos.
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+# Declara o volume que será usado para persistir os dados do banco de dados
+volumes:
+  postgres_data: {}

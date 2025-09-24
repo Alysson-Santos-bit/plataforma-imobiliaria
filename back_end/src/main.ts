@@ -9,7 +9,16 @@ import { ValidationPipe } from '@nestjs/common';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  app.enableCors();
+  // Configuração de CORS robusta
+  const frontendUrl = process.env.FRONTEND_URL;
+  console.log(`A aceitar pedidos do front-end em: ${frontendUrl}`);
+  
+  app.enableCors({
+    origin: frontendUrl, // Permite apenas pedidos vindos deste URL
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    credentials: true,
+  });
+
   app.useGlobalPipes(new ValidationPipe());
 
   const port = process.env.PORT || 3001;

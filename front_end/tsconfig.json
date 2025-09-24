@@ -21,7 +21,6 @@
         "name": "next"
       }
     ],
-    // AQUI ESTÁ A CONFIGURAÇÃO DO ATALHO
     "baseUrl": ".",
     "paths": {
       "@/*": [
@@ -39,3 +38,4 @@
     "node_modules"
   ]
 }
+

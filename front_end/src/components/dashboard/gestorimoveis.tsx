@@ -2,14 +2,15 @@
 
 "use client";
 
-import React, { useState, useEffect, useCallback } from 'react'; // Adicionado useCallback
+import React, { useState, useEffect, useCallback } from 'react';
 import { api } from '@/services/api';
 import type { Imovel } from '@/components/types';
 import { useAuth } from '@/contexts/AuthContext';
 import { PlusCircle, ArrowLeft, Pencil, Trash2 } from 'lucide-react';
 
+
 // ===================================================================
-// SUB-COMPONENTES INTERNOS (com correções)
+// SUB-COMPONENTES INTERNOS (COMPLETOS)
 // ===================================================================
 
 const ListaImoveis = ({ imoveis, onVerDetalhes, onAdicionarClick, isAdminView }: { imoveis: Imovel[], onVerDetalhes: (imovel: Imovel) => void, onAdicionarClick: () => void, isAdminView: boolean }) => (
@@ -57,8 +58,7 @@ const DetalhesImovel = ({ imovel, onVoltar, onEditar, onDeletar, isAdminView }: 
         <div className="p-8">
             <div className="flex justify-between items-center mb-6">
                 <button onClick={onVoltar} className="flex items-center text-indigo-600 hover:text-indigo-800">
-                    <ArrowLeft size={20} className="mr-2" />
-                    Voltar para a lista
+                    <ArrowLeft size={20} className="mr-2" /> Voltar para a lista
                 </button>
                 {isAdminView && (
                     <div className="flex space-x-2">
@@ -77,7 +77,6 @@ const DetalhesImovel = ({ imovel, onVoltar, onEditar, onDeletar, isAdminView }: 
                         <img src={fotoPrincipal} alt={imovel.title} className="w-full h-96 object-cover rounded-lg shadow-lg" />
                         {fotosSecundarias.length > 0 && (
                             <div className="grid grid-cols-3 gap-2 mt-4">
-                                {/* CORREÇÃO 1: Adicionados os tipos 'string' e 'number' para 'foto' e 'index' */}
                                 {fotosSecundarias.map((foto: string, index: number) => (
                                     <img key={index} src={foto} alt={`${imovel.title} - foto ${index + 2}`} className="w-full h-24 object-cover rounded-md" />
                                 ))}
@@ -105,7 +104,107 @@ const DetalhesImovel = ({ imovel, onVoltar, onEditar, onDeletar, isAdminView }: 
     );
 };
 
-const FormularioImovel = ({ onSalvar, onCancelar }: { onSalvar: (data: any) => void, onCancelar: () => void }) => <div>(Formulário de Imóvel vai aqui)</div>;
+// CÓDIGO COMPLETO DO FORMULÁRIO RESTAURADO AQUI
+const FormularioImovel = ({ imovelInicial, onSalvar, onCancelar, tituloForm }: { imovelInicial?: Imovel, onSalvar: (imovel: Omit<Imovel, 'id'>, id?: string) => void, onCancelar: () => void, tituloForm: string }) => {
+    const estadoInicialImovel: Omit<Imovel, 'id'> = {
+        title: '', description: '', address: '', city: '', state: '', zipCode: '',
+        price: 0, area: 0, bedrooms: 0, bathrooms: 0, type: 'HOUSE', imageUrls: [],
+    };
+    const [imovel, setImovel] = useState(imovelInicial || estadoInicialImovel);
+
+    useEffect(() => {
+        setImovel(imovelInicial || estadoInicialImovel);
+    }, [imovelInicial]);
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+        const { name, value } = e.target;
+        if (['price', 'area', 'bedrooms', 'bathrooms'].includes(name)) {
+            setImovel(prev => ({ ...prev, [name]: Number(value) || 0 }));
+        } else if (name === 'imageUrls') {
+            setImovel(prev => ({ ...prev, imageUrls: value.split(',').map(url => url.trim()).filter(Boolean) }));
+        } else {
+            setImovel(prev => ({ ...prev, [name]: value as any }));
+        }
+    };
+    
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        onSalvar(imovel, imovelInicial?.id);
+    };
+
+    return (
+        <div className="p-8">
+            <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold text-gray-800">{tituloForm}</h2>
+                <button onClick={onCancelar} className="flex items-center text-gray-600 hover:text-gray-800">
+                    <ArrowLeft size={20} className="mr-2" /> Cancelar
+                </button>
+            </div>
+            <form onSubmit={handleSubmit} className="bg-white p-8 rounded-xl shadow-md space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="md:col-span-2">
+                        <label htmlFor="title" className="block text-sm font-medium text-gray-700">Título</label>
+                        <input type="text" name="title" id="title" value={imovel.title} onChange={handleChange} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" required />
+                    </div>
+                    <div className="md:col-span-2">
+                        <label htmlFor="description" className="block text-sm font-medium text-gray-700">Descrição</label>
+                        <textarea name="description" id="description" value={imovel.description} onChange={handleChange} rows={4} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" required />
+                    </div>
+                    <div>
+                        <label htmlFor="address" className="block text-sm font-medium text-gray-700">Endereço</label>
+                        <input type="text" name="address" id="address" value={imovel.address} onChange={handleChange} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" />
+                    </div>
+                    <div>
+                        <label htmlFor="city" className="block text-sm font-medium text-gray-700">Cidade</label>
+                        <input type="text" name="city" id="city" value={imovel.city} onChange={handleChange} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" required />
+                    </div>
+                    <div>
+                        <label htmlFor="state" className="block text-sm font-medium text-gray-700">Estado</label>
+                        <input type="text" name="state" id="state" value={imovel.state} onChange={handleChange} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" required />
+                    </div>
+                    <div>
+                        <label htmlFor="zipCode" className="block text-sm font-medium text-gray-700">CEP</label>
+                        <input type="text" name="zipCode" id="zipCode" value={imovel.zipCode} onChange={handleChange} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" />
+                    </div>
+                    <div>
+                        <label htmlFor="price" className="block text-sm font-medium text-gray-700">Preço (R$)</label>
+                        <input type="number" name="price" id="price" value={imovel.price} onChange={handleChange} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" required />
+                    </div>
+                    <div>
+                        <label htmlFor="area" className="block text-sm font-medium text-gray-700">Área (m²)</label>
+                        <input type="number" name="area" id="area" value={imovel.area} onChange={handleChange} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" />
+                    </div>
+                    <div>
+                        <label htmlFor="bedrooms" className="block text-sm font-medium text-gray-700">Quartos</label>
+                        <input type="number" name="bedrooms" id="bedrooms" value={imovel.bedrooms} onChange={handleChange} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" />
+                    </div>
+                    <div>
+                        <label htmlFor="bathrooms" className="block text-sm font-medium text-gray-700">Banheiros</label>
+                        <input type="number" name="bathrooms" id="bathrooms" value={imovel.bathrooms} onChange={handleChange} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" />
+                    </div>
+                    <div className="md:col-span-2">
+                        <label htmlFor="type" className="block text-sm font-medium text-gray-700">Tipo de Imóvel</label>
+                        <select name="type" id="type" value={imovel.type} onChange={handleChange} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 bg-white">
+                            <option value="HOUSE">Casa</option>
+                            <option value="APARTMENT">Apartamento</option>
+                            <option value="LAND">Terreno</option>
+                            <option value="COMMERCIAL">Comercial</option>
+                        </select>
+                    </div>
+                    <div className="md:col-span-2">
+                        <label htmlFor="imageUrls" className="block text-sm font-medium text-gray-700">URLs das Imagens (separadas por vírgula)</label>
+                        <input type="text" name="imageUrls" id="imageUrls" value={imovel.imageUrls.join(', ')} onChange={handleChange} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" />
+                    </div>
+                </div>
+                <div className="flex justify-end pt-4">
+                    <button type="button" onClick={onCancelar} className="bg-gray-200 text-gray-800 px-6 py-2 rounded-lg mr-4 hover:bg-gray-300">Cancelar</button>
+                    <button type="submit" className="bg-indigo-600 text-white px-6 py-2 rounded-lg shadow-md hover:bg-indigo-700">Salvar Imóvel</button>
+                </div>
+            </form>
+        </div>
+    );
+};
+
 
 // ===================================================================
 // COMPONENTE PRINCIPAL (EXPORTADO)
@@ -121,7 +220,6 @@ export const GerenciadorImoveis = ({ termoPesquisa, isAdminView = false }: { ter
 
     const modoAdminReal = isAdminView && isAuthenticated;
 
-    // CORREÇÃO 2: A função fetchImoveis foi movida para fora do useEffect
     const fetchImoveis = useCallback(async () => {
         setLoading(true); setError(null);
         try {
@@ -132,7 +230,7 @@ export const GerenciadorImoveis = ({ termoPesquisa, isAdminView = false }: { ter
         } finally {
             setLoading(false);
         }
-    }, []); // useCallback para otimização
+    }, []);
 
     useEffect(() => {
         fetchImoveis();
@@ -140,14 +238,25 @@ export const GerenciadorImoveis = ({ termoPesquisa, isAdminView = false }: { ter
     
     const handleSalvarImovel = async (imovelData: Omit<Imovel, 'id'>, id?: string) => {
         if (!modoAdminReal) return;
-        // Lógica para salvar aqui
+        try {
+            if (id) {
+                await api.patch(`/properties/${id}`, imovelData);
+            } else {
+                await api.post('/properties', imovelData);
+            }
+            await fetchImoveis();
+            setModo('lista');
+        } catch (err) {
+            console.error("Erro ao salvar imóvel", err);
+            setError("Não foi possível salvar o imóvel.");
+        }
     };
     
     const handleDeletarImovel = async (id: string) => {
         if (!modoAdminReal) return;
         try {
             await api.delete(`/properties/${id}`);
-            await fetchImoveis(); // Agora a função está acessível aqui
+            await fetchImoveis();
             setModo('lista');
         } catch (err) {
             console.error("Erro ao deletar imóvel", err);
@@ -167,9 +276,9 @@ export const GerenciadorImoveis = ({ termoPesquisa, isAdminView = false }: { ter
         case 'detalhes':
             return imovelSelecionado ? <DetalhesImovel imovel={imovelSelecionado} onVoltar={() => setModo('lista')} onEditar={(imovel) => { setImovelSelecionado(imovel); setModo('editar'); }} onDeletar={handleDeletarImovel} isAdminView={modoAdminReal} /> : null;
         case 'adicionar':
-            return <FormularioImovel onSalvar={handleSalvarImovel} onCancelar={() => setModo('lista')} />;
+            return <FormularioImovel onSalvar={handleSalvarImovel} onCancelar={() => setModo('lista')} tituloForm="Adicionar Novo Imóvel"/>;
         case 'editar':
-            return imovelSelecionado ? <FormularioImovel onSalvar={handleSalvarImovel} onCancelar={() => setModo('lista')} /> : null;
+            return imovelSelecionado ? <FormularioImovel imovelInicial={imovelSelecionado} onSalvar={handleSalvarImovel} onCancelar={() => setModo('lista')} tituloForm="Editar Imóvel"/> : null;
         default:
             return <ListaImoveis imoveis={imoveisFiltrados} onVerDetalhes={(imovel) => { setImovelSelecionado(imovel); setModo('detalhes'); }} onAdicionarClick={() => setModo('adicionar')} isAdminView={modoAdminReal} />;
     }

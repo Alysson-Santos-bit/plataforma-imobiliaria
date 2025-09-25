@@ -1,58 +1,53 @@
-// --- Componente do Cabeçalho ---
-// Este é um componente de cabeçalho padrão para uma aplicação web.
-// Ele inclui navegação e é estilizado com Tailwind CSS.
-// A dependência do Next.js foi removida para garantir a compatibilidade.
+// Local: src/components/layout/Header.tsx
+
+"use client";
+
+import Link from 'next/link';
+import { useAuth } from '@/contexts/AuthContext'; // Importamos o hook de autenticação
 
 export default function Header() {
+  // Pegamos o estado de autenticação e a função de logout do nosso contexto
+  const { isAuthenticated, isLoading, logout } = useAuth();
+
   return (
-    <header className="bg-gray-800 text-white shadow-md sticky top-0 z-50">
-      <div className="container mx-auto flex items-center justify-between p-4">
-        
-        {/* Logotipo ou Nome do Site */}
-        <div className="text-2xl font-bold">
-          <a href="/" className="hover:text-blue-400 transition-colors">
-            PlataformaImob
-          </a>
+    <header className="bg-white shadow-md">
+      <nav className="container mx-auto px-6 py-4 flex justify-between items-center">
+        {/* Logo */}
+        <Link href="/" className="text-2xl font-bold text-indigo-600">
+          ImobPlat
+        </Link>
+
+        {/* Links de Navegação */}
+        <div className="flex items-center space-x-4">
+          <Link href="/" className="text-gray-600 hover:text-indigo-600">Início</Link>
+          <Link href="/imoveis" className="text-gray-600 hover:text-indigo-600">Imóveis</Link>
+          {/* ... outros links públicos ... */}
+
+          {/* Lógica de Autenticação */}
+          {isLoading ? (
+            // Enquanto verifica o login, podemos mostrar um placeholder ou nada
+            <div className="w-24 h-8 bg-gray-200 rounded animate-pulse"></div>
+          ) : isAuthenticated ? (
+            // Se o usuário ESTÁ logado
+            <>
+              <Link href="/dashboard" className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700">
+                Acessar Painel
+              </Link>
+              <button 
+                onClick={logout} 
+                className="text-gray-600 hover:text-indigo-600"
+              >
+                Sair
+              </button>
+            </>
+          ) : (
+            // Se o usuário NÃO ESTÁ logado
+            <Link href="/login" className="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700">
+              Fazer Login
+            </Link>
+          )}
         </div>
-
-        {/* Links de Navegação para Desktop */}
-        <nav className="hidden md:flex items-center space-x-6">
-          <a href="/" className="hover:text-blue-400 transition-colors">
-            Início
-          </a>
-          <a href="/imoveis" className="hover:text-blue-400 transition-colors">
-            Imóveis
-          </a>
-          <a href="/sobre" className="hover:text-blue-400 transition-colors">
-            Sobre Nós
-          </a>
-          <a href="/contato" className="hover:text-blue-400 transition-colors">
-            Contato
-          </a>
-          {/* Link para o Painel que criamos */}
-          <a href="/painel" className="hover:text-blue-400 transition-colors">
-            Painel
-          </a>
-        </nav>
-
-        {/* Botão de Ação */}
-        <div className="hidden md:flex">
-           <a href="/login" className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors">
-            Entrar
-          </a>
-        </div>
-
-        {/* Botão de Menu para Mobile (funcionalidade a ser adicionada com useState) */}
-        <div className="md:hidden">
-          <button className="text-white focus:outline-none">
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7"></path>
-            </svg>
-          </button>
-        </div>
-
-      </div>
+      </nav>
     </header>
   );
 }
-

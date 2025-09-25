@@ -1,12 +1,9 @@
-// Local: src/contexts/AuthContext.tsx
-
 "use client";
 
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { api } from '@/services/api';
 
-// Define a interface para os dados do contexto
 interface AuthContextData {
   isAuthenticated: boolean;
   login: (token: string) => void;
@@ -16,20 +13,31 @@ interface AuthContextData {
 
 const AuthContext = createContext<AuthContextData>({} as AuthContextData);
 
-// Este é o "provedor" que irá envolver nossa aplicação
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isLoading, setIsLoading] = useState(true); // Começa como true para verificar o token
+  const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
-    // Ao carregar a aplicação, verifica se existe um token no localStorage
-    const token = localStorage.getItem('token');
-    if (token) {
-      api.defaults.headers.Authorization = `Bearer ${token}`;
-      setIsAuthenticated(true);
+    async function validateToken() {
+      const token = localStorage.getItem('token');
+
+      if (token) {
+        api.defaults.headers.Authorization = `Bearer ${token}`;
+        
+        try {
+          await api.get('/auth/profile');
+          setIsAuthenticated(true);
+        } catch (error) {
+          console.error("Token inválido ou expirado, fazendo logout.");
+          localStorage.removeItem('token');
+          setIsAuthenticated(false);
+        }
+      }
+      setIsLoading(false);
     }
-    setIsLoading(false); // Termina a verificação
+
+    validateToken();
   }, []);
 
   const login = (token: string) => {
@@ -49,9 +57,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   return (
     <AuthContext.Provider value={{ isAuthenticated, login, logout, isLoading }}>
       {children}
-    </AuthContext.Provider>
+    </AuthContext.Provider> // <-- AQUI ESTAVA O ERRO, AGORA CORRIGIDO
   );
 };
 
-// Hook customizado para facilitar o uso do contexto
 export const useAuth = () => useContext(AuthContext);

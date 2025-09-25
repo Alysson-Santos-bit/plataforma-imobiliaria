@@ -19,18 +19,19 @@ import type { PaginaId } from '@/components/types'; // Verifique se o caminho pa
 // --- COMPONENTE PRINCIPAL DA PÁGINA ---
 // ===============================================
 export default function DashboardPage() {
-    // 2. O estado agora vive aqui, no componente "pai"
+    // O estado vive aqui, no componente "pai"
     const [pagina, setPagina] = useState<PaginaId>('painel');
     const [sidebarAberta, setSidebarAberta] = useState(true);
     const [termoPesquisa, setTermoPesquisa] = useState('');
 
-    // 3. Função para decidir qual conteúdo renderizar com base no estado
+    // Função para decidir qual conteúdo renderizar com base no estado
     const renderizarConteudo = () => {
         switch (pagina) {
             case 'painel':
                 return <ConteudoPainel />;
             case 'imoveis':
-                return <GerenciadorImoveis termoPesquisa={termoPesquisa} />;
+                // AQUI ESTÁ A CORREÇÃO: Adicionamos a prop 'isAdminView={true}'
+                return <GerenciadorImoveis termoPesquisa={termoPesquisa} isAdminView={true} />;
             case 'usuarios':
                 return <GerenciadorUsuarios termoPesquisa={termoPesquisa} />;
             case 'analises':
@@ -41,7 +42,7 @@ export default function DashboardPage() {
         }
     };
 
-    // 4. O JSX final que monta a página inteira
+    // O JSX final que monta a página inteira
     return (
         <div className="flex h-screen bg-gray-100 font-sans">
             <BarraLateral 

@@ -10,6 +10,7 @@ import { User } from './users/entities/user.entity';
 import { Property } from './properties/entities/property.entity';
 import { Referral } from './referrals/referrals.entity';
 import { Document } from './documents/document.entity';
+import { DashboardModule } from './dashboard/dashboard.module';
 
 @Module({
   imports: [

@@ -12,30 +12,31 @@ import {
 import { PropertiesService } from './properties.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CreatePropertyDto } from './dto/create-property.dto';
-import { UpdatePropertyDto } from './dto/update-property.dto'; // Importa o DTO de atualização
+import { UpdatePropertyDto } from './dto/update-property.dto';
 
-@UseGuards(JwtAuthGuard)
+// @UseGuards(JwtAuthGuard) // <--- REMOVA O GUARDA DAQUI
 @Controller('properties')
 export class PropertiesController {
   constructor(private readonly propertiesService: PropertiesService) {}
 
   @Post()
+  @UseGuards(JwtAuthGuard) // <--- ADICIONE O GUARDA AQUI (APENAS PARA ESTE MÉTODO)
   create(@Body() createPropertyDto: CreatePropertyDto) {
     return this.propertiesService.create(createPropertyDto);
   }
 
-  @Get()
+  @Get() // <--- ROTA PÚBLICA - Não precisa de guarda
   findAll() {
     return this.propertiesService.findAll();
   }
 
-  @Get(':id')
+  @Get(':id') // <--- ROTA PÚBLICA - Não precisa de guarda
   findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.propertiesService.findOne(id);
   }
 
-  // --- ROTA DE ATUALIZAÇÃO AGORA USA O DTO CORRETO ---
   @Patch(':id')
+  @UseGuards(JwtAuthGuard) // <--- ADICIONE O GUARDA AQUI
   update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updatePropertyDto: UpdatePropertyDto,
@@ -44,8 +45,8 @@ export class PropertiesController {
   }
 
   @Delete(':id')
+  @UseGuards(JwtAuthGuard) // <--- ADICIONE O GUARDA AQUI
   remove(@Param('id', ParseUUIDPipe) id: string) {
     return this.propertiesService.remove(id);
   }
 }
-

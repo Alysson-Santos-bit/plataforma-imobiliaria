@@ -1,13 +1,11 @@
-# Arquivo: render.yaml
-
 services:
-  # Serviço do Banco de Dados PostgreSQL
+  # 1. Serviço do Banco de Dados PostgreSQL
   - type: psql
     name: imobplat-db
     plan: free
     region: oregon # Garante que todos os serviços fiquem na mesma região
 
-  # Serviço do Back-end (NestJS)
+  # 2. Serviço do Back-end (NestJS)
   - type: web
     name: plataforma-imobiliaria
     runtime: node
@@ -31,7 +29,7 @@ services:
       - key: NODE_ENV
         value: production
 
-  # Serviço do Front-end (Next.js)
+  # 3. Serviço do Front-end (Next.js)
   - type: web
     name: imobplat-frontend
     runtime: node
@@ -46,5 +44,3 @@ services:
           type: web
           name: plataforma-imobiliaria
           property: url
-
-          

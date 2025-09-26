@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { api } from '../../../services/api'; // Corrigido para usar o atalho de caminho configurado
+import { api } from '@/services/api'; // CORRIGIDO: Usando o atalho robusto
 
 const RegisterPage = () => {
   const [name, setName] = useState('');

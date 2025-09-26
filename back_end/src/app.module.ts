@@ -1,41 +1,61 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config'; // Importe o ConfigService
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { PropertiesModule } from './properties/properties.module';
 import { DocumentsModule } from './documents/documents.module';
 import { ReferralsModule } from './referrals/referrals.module';
+import { DashboardModule } from './dashboard/dashboard.module';
+
+// Suas entidades
 import { User } from './users/entities/user.entity';
 import { Property } from './properties/entities/property.entity';
 import { Referral } from './referrals/referrals.entity';
 import { Document } from './documents/document.entity';
-import { DashboardModule } from './dashboard/dashboard.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
-      isGlobal: true,
+      isGlobal: true, // Torna o ConfigModule global
     }),
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      // --- CORRIGIDO ---
-      // Agora, estamos a usar os nomes corretos das variáveis do ficheiro .env
-      host: process.env.DB_HOST,
-      port: parseInt(process.env.DB_PORT, 10) || 5432,
-      username: process.env.DB_USERNAME,
-      password: process.env.DB_PASSWORD,
-      database: process.env.DB_DATABASE,
-      // --- FIM DA CORREÇÃO ---
-      entities: [User, Property, Referral, Document],
-      synchronize: true, // `synchronize: true` é ótimo para desenvolvimento, mas deve ser desativado em produção.
-      logging: false,
+    
+    // Configuração do TypeORM modificada para ser assíncrona e inteligente
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => {
+        const isProduction = configService.get<string>('NODE_ENV') === 'production';
+        
+        return {
+          type: 'postgres',
+          
+          // No Render, ele usará a DATABASE_URL. Localmente, usará as variáveis separadas.
+          url: configService.get<string>('DATABASE_URL'),
+          host: configService.get<string>('DB_HOST', 'localhost'),
+          port: configService.get<number>('DB_PORT', 5432),
+          username: configService.get<string>('DB_USERNAME'),
+          password: configService.get<string>('DB_PASSWORD'),
+          database: configService.get<string>('DB_DATABASE'),
+          
+          // Configuração de SSL necessária para se conectar a bancos em nuvem como o do Render
+          // Ativamos apenas em produção para não atrapalhar o ambiente local
+          ssl: isProduction ? { rejectUnauthorized: false } : false,
+
+          entities: [User, Property, Referral, Document],
+          
+          // Em produção, é melhor usar migrations (synchronize: false)
+          synchronize: !isProduction, 
+        };
+      },
     }),
+
     AuthModule,
     UsersModule,
     PropertiesModule,
     DocumentsModule,
     ReferralsModule,
+    DashboardModule,
   ],
   controllers: [],
   providers: [],

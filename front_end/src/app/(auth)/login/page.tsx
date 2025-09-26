@@ -1,16 +1,15 @@
+// Local: src/app/(auth)/login/page.tsx
+
 "use client";
 
 import React, { useState } from 'react';
+import Link from 'next/link'; // Importe o componente Link
 import { useRouter } from 'next/navigation';
-import { api } from '../../../services/api';
-import { useAuth } from '../../../contexts/AuthContext'; // Importa o hook para usar o contexto
+import { api } from '@/services/api';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function LoginPage() {
-  // O useRouter não é mais necessário para redirecionar, pois o AuthContext já faz isso.
-  // Mantemos ele aqui caso precise para outras lógicas no futuro.
-  const router = useRouter(); 
-  
-  // Pega a função 'login' do nosso AuthContext. É ela que vai gerenciar o token e o redirecionamento.
+  const router = useRouter();
   const { login } = useAuth(); 
 
   const [email, setEmail] = useState('');
@@ -24,28 +23,22 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      // Envia as credenciais para o endpoint /auth/login do seu back-end
       const response = await api.post('/auth/login', {
         email,
         password,
       });
 
-      // Extrai o token da resposta
       const { access_token } = response.data;
 
       if (access_token) {
-        // Usa a função 'login' do AuthContext.
-        // Ela irá salvar o token, configurar o Axios e redirecionar para o dashboard.
         login(access_token);
       } else {
-        setError('Resposta do servidor não incluiu um token de acesso.');
+        setError('Resposta do servidor не incluiu um token de acesso.');
       }
 
     } catch (err: any) {
-      // Pega a mensagem de erro do back-end (ex: "Credenciais inválidas.")
       const errorMessage = err.response?.data?.message || 'Ocorreu um erro ao tentar fazer login.';
       setError(errorMessage);
-      console.error('Erro de login:', err);
     } finally {
       setIsLoading(false);
     }
@@ -103,6 +96,16 @@ export default function LoginPage() {
             </button>
           </div>
         </form>
+
+        {/* --- LINHAS ADICIONADAS AQUI --- */}
+        <p className="text-sm text-center text-gray-600">
+          Não tem uma conta?{' '}
+          <Link href="/register" className="font-medium text-indigo-600 hover:text-indigo-500">
+            Crie uma agora
+          </Link>
+        </p>
+        {/* --- FIM DAS LINHAS ADICIONADAS --- */}
+
       </div>
     </div>
   );

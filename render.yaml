@@ -1,13 +1,12 @@
 # Arquivo: render.yaml
 
 databases:
-  # 1. O banco de dados é definido aqui, na sua própria seção
   - name: imobplat-db
     region: oregon
     plan: free
 
 services:
-  # 2. Serviço do Back-end (NestJS)
+  # Serviço do Back-end (NestJS)
   - type: web
     name: plataforma-imobiliaria
     runtime: node
@@ -23,15 +22,13 @@ services:
           property: connectionString
       - key: JWT_SECRET
         generateValue: true
-      - key: FRONTEND_URL
-        fromService:
-          type: web
-          name: imobplat-frontend
-          property: url
       - key: NODE_ENV
         value: production
+      # CORREÇÃO: Definimos a URL do front-end explicitamente
+      - key: FRONTEND_URL
+        value: https://imobplat-frontend.onrender.com
 
-  # 3. Serviço do Front-end (Next.js)
+  # Serviço do Front-end (Next.js)
   - type: web
     name: imobplat-frontend
     runtime: node
@@ -41,8 +38,6 @@ services:
     buildCommand: "npm install && npm run build"
     startCommand: "npm run start"
     envVars:
+      # CORREÇÃO: Definimos a URL do back-end explicitamente
       - key: NEXT_PUBLIC_API_BASE_URL
-        fromService:
-          type: web
-          name: plataforma-imobiliaria
-          property: url
+        value: https://plataforma-imobiliaria.onrender.com

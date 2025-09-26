@@ -5,15 +5,15 @@
 import React, { useState } from 'react';
 
 // 1. Importe os componentes que seu amigo separou
-import { BarraLateral } from '@/components/dashboard/barra-lateral';
-import { Cabecalho } from '@/components/dashboard/cabecalho';
-import { ConteudoPainel } from '@/components/dashboard/conteudopainel';
-import { ConteudoPlaceholder } from '@/components/dashboard/conteudoplaceholder';
-import { GerenciadorImoveis } from '@/components/dashboard/gestorimoveis';
-import { GerenciadorUsuarios } from '@/components/dashboard/gestorusuarios';
+import { BarraLateral } from '../../../components/dashboard/barra-lateral';
+import { Cabecalho } from '../../../components/dashboard/cabecalho';
+import { ConteudoPainel } from '../../../components/dashboard/conteudopainel';
+import { ConteudoPlaceholder } from '../../../components/dashboard/conteudoplaceholder';
+import { GerenciadorImoveis } from '../../../components/dashboard/gestorimoveis';
+import { GerenciadorUsuarios } from '../../../components/dashboard/gestorusuarios';
 
 // Importe os tipos necessários
-import type { PaginaId } from '@/components/types'; // Verifique se o caminho para o seu arquivo de tipos está correto
+import type { PaginaId } from '../../../components/types'; // Verifique se o caminho para o seu arquivo de tipos está correto
 
 // ===============================================
 // --- COMPONENTE PRINCIPAL DA PÁGINA ---

@@ -2,8 +2,8 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { api } from '@/services/api';
-import { useAuth } from '@/contexts/AuthContext'; // Importa o hook para usar o contexto
+import { api } from '../../../services/api';
+import { useAuth } from '../../../contexts/AuthContext'; // Importa o hook para usar o contexto
 
 export default function LoginPage() {
   // O useRouter não é mais necessário para redirecionar, pois o AuthContext já faz isso.

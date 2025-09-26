@@ -1,0 +1,29 @@
+# Arquivo: render.yaml
+
+services:
+  # Serviço do Back-end (NestJS)
+  - name: plataforma-imobiliaria # O nome que você confirmou para o seu back-end
+    type: web
+    runtime: node
+    plan: free
+    rootDir: back_end
+    buildCommand: "npm install && npm run build"
+    startCommand: "npm run start:prod"
+    envVars:
+      - fromGroup: imobplat-secrets # Puxa as variáveis do seu grupo 'imobplat-secrets'
+      - key: NODE_ENV
+        value: production
+      # Força a instalação de devDependencies para garantir que o `nest` CLI exista
+      - key: NPM_CONFIG_PRODUCTION
+        value: false
+
+  # Serviço do Front-end (Next.js)
+  - name: imobplat-frontend
+    type: web
+    runtime: node
+    plan: free
+    rootDir: front_end
+    buildCommand: "npm install && npm run build"
+    startCommand: "npm run start"
+    envVars:
+      - fromGroup: imobplat-secrets # Puxa as variáveis do seu grupo 'imobplat-secrets'
